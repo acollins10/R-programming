@@ -1,0 +1,468 @@
+<html>
+
+<head>
+<style type="text/css">
+.knitr .inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage .left {
+  text-align: left;
+}
+.rimage .right {
+  text-align: right;
+}
+.rimage .center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<title>Title</title>
+</head>
+
+<body>
+
+<p>Student Math Scores:</p>
+<p> Project Scope: Attempt to predict final grades for student math scores. Datasource: UCI machine learning repository</p>
+
+<div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com">#Data prep and clean</span>
+<span class="hl std">df</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.csv</span><span class="hl std">(</span><span class="hl str">'student-mat.csv'</span><span class="hl std">,</span><span class="hl kwc">sep</span><span class="hl std">=</span><span class="hl str">';'</span><span class="hl std">)</span>
+<span class="hl kwd">head</span><span class="hl std">(df)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   school sex age address famsize Pstatus Medu Fedu     Mjob     Fjob
+## 1     GP   F  18       U     GT3       A    4    4  at_home  teacher
+## 2     GP   F  17       U     GT3       T    1    1  at_home    other
+## 3     GP   F  15       U     LE3       T    1    1  at_home    other
+## 4     GP   F  15       U     GT3       T    4    2   health services
+## 5     GP   F  16       U     GT3       T    3    3    other    other
+## 6     GP   M  16       U     LE3       T    4    3 services    other
+##       reason guardian traveltime studytime failures schoolsup famsup paid
+## 1     course   mother          2         2        0       yes     no   no
+## 2     course   father          1         2        0        no    yes   no
+## 3      other   mother          1         2        3       yes     no  yes
+## 4       home   mother          1         3        0        no    yes  yes
+## 5       home   father          1         2        0        no    yes  yes
+## 6 reputation   mother          1         2        0        no    yes  yes
+##   activities nursery higher internet romantic famrel freetime goout Dalc
+## 1         no     yes    yes       no       no      4        3     4    1
+## 2         no      no    yes      yes       no      5        3     3    1
+## 3         no     yes    yes      yes       no      4        3     2    2
+## 4        yes     yes    yes      yes      yes      3        2     2    1
+## 5         no     yes    yes       no       no      4        3     2    1
+## 6        yes     yes    yes      yes       no      5        4     2    1
+##   Walc health absences G1 G2 G3
+## 1    1      3        6  5  6  6
+## 2    1      3        4  5  5  6
+## 3    3      3       10  7  8 10
+## 4    1      5        2 15 14 15
+## 5    2      5        4  6 10 10
+## 6    2      5       10 15 15 15
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">summary</span><span class="hl std">(df)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  school   sex          age       address famsize   Pstatus      Medu      
+##  GP:349   F:208   Min.   :15.0   R: 88   GT3:281   A: 41   Min.   :0.000  
+##  MS: 46   M:187   1st Qu.:16.0   U:307   LE3:114   T:354   1st Qu.:2.000  
+##                   Median :17.0                             Median :3.000  
+##                   Mean   :16.7                             Mean   :2.749  
+##                   3rd Qu.:18.0                             3rd Qu.:4.000  
+##                   Max.   :22.0                             Max.   :4.000  
+##       Fedu             Mjob           Fjob            reason   
+##  Min.   :0.000   at_home : 59   at_home : 20   course    :145  
+##  1st Qu.:2.000   health  : 34   health  : 18   home      :109  
+##  Median :2.000   other   :141   other   :217   other     : 36  
+##  Mean   :2.522   services:103   services:111   reputation:105  
+##  3rd Qu.:3.000   teacher : 58   teacher : 29                   
+##  Max.   :4.000                                                 
+##    guardian     traveltime      studytime        failures      schoolsup
+##  father: 90   Min.   :1.000   Min.   :1.000   Min.   :0.0000   no :344  
+##  mother:273   1st Qu.:1.000   1st Qu.:1.000   1st Qu.:0.0000   yes: 51  
+##  other : 32   Median :1.000   Median :2.000   Median :0.0000            
+##               Mean   :1.448   Mean   :2.035   Mean   :0.3342            
+##               3rd Qu.:2.000   3rd Qu.:2.000   3rd Qu.:0.0000            
+##               Max.   :4.000   Max.   :4.000   Max.   :3.0000            
+##  famsup     paid     activities nursery   higher    internet  romantic 
+##  no :153   no :214   no :194    no : 81   no : 20   no : 66   no :263  
+##  yes:242   yes:181   yes:201    yes:314   yes:375   yes:329   yes:132  
+##                                                                        
+##                                                                        
+##                                                                        
+##                                                                        
+##      famrel         freetime         goout            Dalc      
+##  Min.   :1.000   Min.   :1.000   Min.   :1.000   Min.   :1.000  
+##  1st Qu.:4.000   1st Qu.:3.000   1st Qu.:2.000   1st Qu.:1.000  
+##  Median :4.000   Median :3.000   Median :3.000   Median :1.000  
+##  Mean   :3.944   Mean   :3.235   Mean   :3.109   Mean   :1.481  
+##  3rd Qu.:5.000   3rd Qu.:4.000   3rd Qu.:4.000   3rd Qu.:2.000  
+##  Max.   :5.000   Max.   :5.000   Max.   :5.000   Max.   :5.000  
+##       Walc           health         absences            G1       
+##  Min.   :1.000   Min.   :1.000   Min.   : 0.000   Min.   : 3.00  
+##  1st Qu.:1.000   1st Qu.:3.000   1st Qu.: 0.000   1st Qu.: 8.00  
+##  Median :2.000   Median :4.000   Median : 4.000   Median :11.00  
+##  Mean   :2.291   Mean   :3.554   Mean   : 5.709   Mean   :10.91  
+##  3rd Qu.:3.000   3rd Qu.:5.000   3rd Qu.: 8.000   3rd Qu.:13.00  
+##  Max.   :5.000   Max.   :5.000   Max.   :75.000   Max.   :19.00  
+##        G2              G3       
+##  Min.   : 0.00   Min.   : 0.00  
+##  1st Qu.: 9.00   1st Qu.: 8.00  
+##  Median :11.00   Median :11.00  
+##  Mean   :10.71   Mean   :10.42  
+##  3rd Qu.:13.00   3rd Qu.:14.00  
+##  Max.   :19.00   Max.   :20.00
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">any</span><span class="hl std">(</span><span class="hl kwd">is.na</span><span class="hl std">(df))</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] FALSE
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">str</span><span class="hl std">(df)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## 'data.frame':	395 obs. of  33 variables:
+##  $ school    : Factor w/ 2 levels &quot;GP&quot;,&quot;MS&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ sex       : Factor w/ 2 levels &quot;F&quot;,&quot;M&quot;: 1 1 1 1 1 2 2 1 2 2 ...
+##  $ age       : int  18 17 15 15 16 16 16 17 15 15 ...
+##  $ address   : Factor w/ 2 levels &quot;R&quot;,&quot;U&quot;: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ famsize   : Factor w/ 2 levels &quot;GT3&quot;,&quot;LE3&quot;: 1 1 2 1 1 2 2 1 2 1 ...
+##  $ Pstatus   : Factor w/ 2 levels &quot;A&quot;,&quot;T&quot;: 1 2 2 2 2 2 2 1 1 2 ...
+##  $ Medu      : int  4 1 1 4 3 4 2 4 3 3 ...
+##  $ Fedu      : int  4 1 1 2 3 3 2 4 2 4 ...
+##  $ Mjob      : Factor w/ 5 levels &quot;at_home&quot;,&quot;health&quot;,..: 1 1 1 2 3 4 3 3 4 3 ...
+##  $ Fjob      : Factor w/ 5 levels &quot;at_home&quot;,&quot;health&quot;,..: 5 3 3 4 3 3 3 5 3 3 ...
+##  $ reason    : Factor w/ 4 levels &quot;course&quot;,&quot;home&quot;,..: 1 1 3 2 2 4 2 2 2 2 ...
+##  $ guardian  : Factor w/ 3 levels &quot;father&quot;,&quot;mother&quot;,..: 2 1 2 2 1 2 2 2 2 2 ...
+##  $ traveltime: int  2 1 1 1 1 1 1 2 1 1 ...
+##  $ studytime : int  2 2 2 3 2 2 2 2 2 2 ...
+##  $ failures  : int  0 0 3 0 0 0 0 0 0 0 ...
+##  $ schoolsup : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 2 1 2 1 1 1 1 2 1 1 ...
+##  $ famsup    : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 2 1 2 2 2 1 2 2 2 ...
+##  $ paid      : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 1 2 2 2 2 1 1 2 2 ...
+##  $ activities: Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 1 1 2 1 2 1 1 1 2 ...
+##  $ nursery   : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 2 1 2 2 2 2 2 2 2 2 ...
+##  $ higher    : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ internet  : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 2 2 2 1 2 2 1 2 2 ...
+##  $ romantic  : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 1 1 2 1 1 1 1 1 1 ...
+##  $ famrel    : int  4 5 4 3 4 5 4 4 4 5 ...
+##  $ freetime  : int  3 3 3 2 3 4 4 1 2 5 ...
+##  $ goout     : int  4 3 2 2 2 2 4 4 2 1 ...
+##  $ Dalc      : int  1 1 2 1 1 1 1 1 1 1 ...
+##  $ Walc      : int  1 1 3 1 2 2 1 1 1 1 ...
+##  $ health    : int  3 3 3 5 5 5 3 1 1 5 ...
+##  $ absences  : int  6 4 10 2 4 10 0 6 0 0 ...
+##  $ G1        : int  5 5 7 15 6 15 12 6 16 14 ...
+##  $ G2        : int  6 5 8 14 10 15 12 5 18 15 ...
+##  $ G3        : int  6 6 10 15 10 15 11 6 19 15 ...
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(ggplot2)</span>
+<span class="hl kwd">library</span><span class="hl std">(ggthemes)</span>
+</pre></div>
+<div class="error"><pre class="knitr r">## Error in library(ggthemes): there is no package called 'ggthemes'
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(dplyr)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'dplyr'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl com">#Exploratory data analysis</span>
+<span class="hl std">num.cols</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sapply</span><span class="hl std">(df, is.numeric)</span>
+<span class="hl std">cor.data</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">cor</span><span class="hl std">(df[,num.cols])</span>
+<span class="hl std">cor.data</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##                     age         Medu         Fedu   traveltime
+## age         1.000000000 -0.163658419 -0.163438069  0.070640721
+## Medu       -0.163658419  1.000000000  0.623455112 -0.171639305
+## Fedu       -0.163438069  0.623455112  1.000000000 -0.158194054
+## traveltime  0.070640721 -0.171639305 -0.158194054  1.000000000
+## studytime  -0.004140037  0.064944137 -0.009174639 -0.100909119
+## failures    0.243665377 -0.236679963 -0.250408444  0.092238746
+## famrel      0.053940096 -0.003914458 -0.001369727 -0.016807986
+## freetime    0.016434389  0.030890867 -0.012845528 -0.017024944
+## goout       0.126963880  0.064094438  0.043104668  0.028539674
+## Dalc        0.131124605  0.019834099  0.002386429  0.138325309
+## Walc        0.117276052 -0.047123460 -0.012631018  0.134115752
+## health     -0.062187369 -0.046877829  0.014741537  0.007500606
+## absences    0.175230079  0.100284818  0.024472887 -0.012943775
+## G1         -0.064081497  0.205340997  0.190269936 -0.093039992
+## G2         -0.143474049  0.215527168  0.164893393 -0.153197963
+## G3         -0.161579438  0.217147496  0.152456939 -0.117142053
+##               studytime    failures       famrel    freetime        goout
+## age        -0.004140037  0.24366538  0.053940096  0.01643439  0.126963880
+## Medu        0.064944137 -0.23667996 -0.003914458  0.03089087  0.064094438
+## Fedu       -0.009174639 -0.25040844 -0.001369727 -0.01284553  0.043104668
+## traveltime -0.100909119  0.09223875 -0.016807986 -0.01702494  0.028539674
+## studytime   1.000000000 -0.17356303  0.039730704 -0.14319841 -0.063903675
+## failures   -0.173563031  1.00000000 -0.044336626  0.09198747  0.124560922
+## famrel      0.039730704 -0.04433663  1.000000000  0.15070144  0.064568411
+## freetime   -0.143198407  0.09198747  0.150701444  1.00000000  0.285018715
+## goout      -0.063903675  0.12456092  0.064568411  0.28501871  1.000000000
+## Dalc       -0.196019263  0.13604693 -0.077594357  0.20900085  0.266993848
+## Walc       -0.253784731  0.14196203 -0.113397308  0.14782181  0.420385745
+## health     -0.075615863  0.06582728  0.094055728  0.07573336 -0.009577254
+## absences   -0.062700175  0.06372583 -0.044354095 -0.05807792  0.044302220
+## G1          0.160611915 -0.35471761  0.022168316  0.01261293 -0.149103967
+## G2          0.135879999 -0.35589563 -0.018281347 -0.01377714 -0.162250034
+## G3          0.097819690 -0.36041494  0.051363429  0.01130724 -0.132791474
+##                    Dalc        Walc       health    absences          G1
+## age         0.131124605  0.11727605 -0.062187369  0.17523008 -0.06408150
+## Medu        0.019834099 -0.04712346 -0.046877829  0.10028482  0.20534100
+## Fedu        0.002386429 -0.01263102  0.014741537  0.02447289  0.19026994
+## traveltime  0.138325309  0.13411575  0.007500606 -0.01294378 -0.09303999
+## studytime  -0.196019263 -0.25378473 -0.075615863 -0.06270018  0.16061192
+## failures    0.136046931  0.14196203  0.065827282  0.06372583 -0.35471761
+## famrel     -0.077594357 -0.11339731  0.094055728 -0.04435409  0.02216832
+## freetime    0.209000848  0.14782181  0.075733357 -0.05807792  0.01261293
+## goout       0.266993848  0.42038575 -0.009577254  0.04430222 -0.14910397
+## Dalc        1.000000000  0.64754423  0.077179582  0.11190803 -0.09415879
+## Walc        0.647544230  1.00000000  0.092476317  0.13629110 -0.12617921
+## health      0.077179582  0.09247632  1.000000000 -0.02993671 -0.07317207
+## absences    0.111908026  0.13629110 -0.029936711  1.00000000 -0.03100290
+## G1         -0.094158792 -0.12617921 -0.073172073 -0.03100290  1.00000000
+## G2         -0.064120183 -0.08492735 -0.097719866 -0.03177670  0.85211807
+## G3         -0.054660041 -0.05193932 -0.061334605  0.03424732  0.80146793
+##                     G2          G3
+## age        -0.14347405 -0.16157944
+## Medu        0.21552717  0.21714750
+## Fedu        0.16489339  0.15245694
+## traveltime -0.15319796 -0.11714205
+## studytime   0.13588000  0.09781969
+## failures   -0.35589563 -0.36041494
+## famrel     -0.01828135  0.05136343
+## freetime   -0.01377714  0.01130724
+## goout      -0.16225003 -0.13279147
+## Dalc       -0.06412018 -0.05466004
+## Walc       -0.08492735 -0.05193932
+## health     -0.09771987 -0.06133460
+## absences   -0.03177670  0.03424732
+## G1          0.85211807  0.80146793
+## G2          1.00000000  0.90486799
+## G3          0.90486799  1.00000000
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">install.packages</span><span class="hl std">(</span><span class="hl str">'corrgram'</span><span class="hl std">,</span><span class="hl kwc">repos</span> <span class="hl std">=</span> <span class="hl str">'http://cran.us.r-project.org'</span><span class="hl std">)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## Installing package into 'C:/Users/April/Documents/R/win-library/3.3'
+## (as 'lib' is unspecified)
+</pre></div>
+<div class="output"><pre class="knitr r">## 
+##   There is a binary version available but the source version is
+##   later:
+##          binary source needs_compilation
+## corrgram   1.12   1.13             FALSE
+</pre></div>
+<div class="message"><pre class="knitr r">## installing the source package 'corrgram'
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">install.packages</span><span class="hl std">(</span><span class="hl str">'corrplot'</span><span class="hl std">,</span><span class="hl kwc">repos</span> <span class="hl std">=</span> <span class="hl str">'http://cran.us.r-project.org'</span><span class="hl std">)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## Installing package into 'C:/Users/April/Documents/R/win-library/3.3'
+## (as 'lib' is unspecified)
+</pre></div>
+<div class="output"><pre class="knitr r">## package 'corrplot' successfully unpacked and MD5 sums checked
+## 
+## The downloaded binary packages are in
+## 	C:\Users\April\AppData\Local\Temp\RtmpiIRRAn\downloaded_packages
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(corrplot)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## corrplot 0.84 loaded
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(corrgram)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'corrgram'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following object is masked from 'package:lattice':
+## 
+##     panel.fill
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">corrplot</span><span class="hl std">(cor.data,</span><span class="hl kwc">method</span><span class="hl std">=</span><span class="hl str">'color'</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-1-1.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rcode">
+<div class="source"><pre class="knitr r"><span class="hl kwd">corrgram</span><span class="hl std">(df,</span><span class="hl kwc">order</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">lower.panel</span><span class="hl std">=panel.shade,</span>
+  <span class="hl kwc">upper.panel</span><span class="hl std">=panel.pie,</span> <span class="hl kwc">text.panel</span><span class="hl std">=panel.txt)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-1-2.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rcode">
+<div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(df,</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=G3))</span> <span class="hl opt">+</span> <span class="hl kwd">geom_histogram</span><span class="hl std">(</span><span class="hl kwc">bins</span><span class="hl std">=</span><span class="hl num">20</span><span class="hl std">,</span><span class="hl kwc">alpha</span><span class="hl std">=</span><span class="hl num">0.5</span><span class="hl std">,</span><span class="hl kwc">fill</span><span class="hl std">=</span><span class="hl str">'blue'</span><span class="hl std">)</span> <span class="hl opt">+</span> <span class="hl kwd">theme_minimal</span><span class="hl std">()</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-1-3.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rcode">
+<div class="source"><pre class="knitr r"><span class="hl com">#Create model...train/test/split</span>
+<span class="hl kwd">library</span><span class="hl std">(caTools)</span>
+<span class="hl kwd">set.seed</span><span class="hl std">(</span><span class="hl num">101</span><span class="hl std">)</span>
+<span class="hl std">sample</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sample.split</span><span class="hl std">(df</span><span class="hl opt">$</span><span class="hl std">age,</span> <span class="hl kwc">SplitRatio</span> <span class="hl std">=</span> <span class="hl num">0.70</span><span class="hl std">)</span> <span class="hl com"># SplitRatio = percent of sample==TRUE</span>
+<span class="hl std">train</span> <span class="hl kwb">=</span> <span class="hl kwd">subset</span><span class="hl std">(df, sample</span> <span class="hl opt">==</span> <span class="hl num">TRUE</span><span class="hl std">)</span>
+<span class="hl std">test</span> <span class="hl kwb">=</span> <span class="hl kwd">subset</span><span class="hl std">(df, sample</span> <span class="hl opt">==</span> <span class="hl num">FALSE</span><span class="hl std">)</span>
+<span class="hl std">model</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">lm</span><span class="hl std">(G3</span> <span class="hl opt">~</span> <span class="hl std">.,train)</span>
+
+<span class="hl kwd">summary</span><span class="hl std">(model)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## 
+## Call:
+## lm(formula = G3 ~ ., data = train)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.7681 -0.6423  0.2294  1.0691  4.5942 
+## 
+## Coefficients:
+##                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)      -1.329568   2.474569  -0.537 0.591574    
+## schoolMS          0.838581   0.470545   1.782 0.076016 .  
+## sexM              0.034883   0.275586   0.127 0.899382    
+## age              -0.214994   0.119579  -1.798 0.073472 .  
+## addressU          0.067190   0.326035   0.206 0.836905    
+## famsizeLE3       -0.111068   0.283228  -0.392 0.695302    
+## PstatusT         -0.153653   0.401679  -0.383 0.702417    
+## Medu              0.279949   0.171111   1.636 0.103164    
+## Fedu             -0.221275   0.151103  -1.464 0.144422    
+## Mjobhealth        0.002065   0.610532   0.003 0.997304    
+## Mjobother         0.509947   0.403195   1.265 0.207209    
+## Mjobservices      0.475476   0.435332   1.092 0.275857    
+## Mjobteacher       0.285345   0.550640   0.518 0.604802    
+## Fjobhealth        0.433172   0.774191   0.560 0.576343    
+## Fjobother        -0.296792   0.577217  -0.514 0.607611    
+## Fjobservices     -0.311595   0.593628  -0.525 0.600148    
+## Fjobteacher      -0.321205   0.712695  -0.451 0.652628    
+## reasonhome       -0.431435   0.319907  -1.349 0.178755    
+## reasonother       0.159612   0.454480   0.351 0.725755    
+## reasonreputation -0.051845   0.317894  -0.163 0.870589    
+## guardianmother    0.267462   0.311371   0.859 0.391226    
+## guardianother    -0.157335   0.554872  -0.284 0.777003    
+## traveltime        0.274301   0.197865   1.386 0.166968    
+## studytime        -0.140650   0.155149  -0.907 0.365577    
+## failures         -0.185333   0.211040  -0.878 0.380739    
+## schoolsupyes      0.562716   0.379303   1.484 0.139268    
+## famsupyes         0.369402   0.268848   1.374 0.170745    
+## paidyes           0.060643   0.270971   0.224 0.823107    
+## activitiesyes    -0.286006   0.247519  -1.155 0.249063    
+## nurseryyes       -0.426858   0.315064  -1.355 0.176774    
+## higheryes         0.503353   0.677346   0.743 0.458148    
+## internetyes      -0.097405   0.331040  -0.294 0.768834    
+## romanticyes      -0.243837   0.268414  -0.908 0.364577    
+## famrel            0.494479   0.136663   3.618 0.000363 ***
+## freetime         -0.139869   0.138297  -1.011 0.312879    
+## goout             0.078871   0.128794   0.612 0.540879    
+## Dalc             -0.248633   0.178366  -1.394 0.164651    
+## Walc              0.221434   0.139178   1.591 0.112950    
+## health            0.027495   0.095100   0.289 0.772748    
+## absences          0.060830   0.017915   3.396 0.000804 ***
+## G1                0.162966   0.076956   2.118 0.035255 *  
+## G2                0.994677   0.066450  14.969  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.868 on 235 degrees of freedom
+## Multiple R-squared:  0.8616,	Adjusted R-squared:  0.8374 
+## F-statistic: 35.68 on 41 and 235 DF,  p-value: &lt; 2.2e-16
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">res</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">residuals</span><span class="hl std">(model)</span>
+<span class="hl std">res</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">as.data.frame</span><span class="hl std">(res)</span>
+<span class="hl kwd">head</span><span class="hl std">(res)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##           res
+## 1   0.9678451
+## 5   1.1829980
+## 6  -1.4096050
+## 7   0.1125706
+## 9   0.3814670
+## 10  0.3221204
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(res,</span><span class="hl kwd">aes</span><span class="hl std">(res))</span> <span class="hl opt">+</span>  <span class="hl kwd">geom_histogram</span><span class="hl std">(</span><span class="hl kwc">fill</span><span class="hl std">=</span><span class="hl str">'blue'</span><span class="hl std">,</span><span class="hl kwc">alpha</span><span class="hl std">=</span><span class="hl num">0.5</span><span class="hl std">)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-1-4.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rcode">
+<div class="source"><pre class="knitr r"><span class="hl com">#there are values &lt;-5.deep dive/more analysis needed</span>
+<span class="hl kwd">plot</span><span class="hl std">(model)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-1-5.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rimage default"><img src="figure/unnamed-chunk-1-6.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rimage default"><img src="figure/unnamed-chunk-1-7.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rimage default"><img src="figure/unnamed-chunk-1-8.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rcode">
+<div class="source"><pre class="knitr r"><span class="hl com">#not good...predicting students will get negative scores</span>
+<span class="hl com">#Creating predictions</span>
+<span class="hl std">G3.predictions</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">predict</span><span class="hl std">(model,test)</span>
+<span class="hl std">results</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">cbind</span><span class="hl std">(G3.predictions,test</span><span class="hl opt">$</span><span class="hl std">G3)</span>
+<span class="hl kwd">colnames</span><span class="hl std">(results)</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl str">'pred'</span><span class="hl std">,</span><span class="hl str">'real'</span><span class="hl std">)</span>
+<span class="hl std">results</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">as.data.frame</span><span class="hl std">(results)</span>
+<span class="hl com">#create function to remove negative values from predictions</span>
+<span class="hl std">to_zero</span> <span class="hl kwb">&lt;-</span> <span class="hl kwa">function</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">){</span>
+    <span class="hl kwa">if</span>  <span class="hl std">(x</span> <span class="hl opt">&lt;</span> <span class="hl num">0</span><span class="hl std">){</span>
+        <span class="hl kwd">return</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">)</span>
+    <span class="hl std">}</span><span class="hl kwa">else</span><span class="hl std">{</span>
+        <span class="hl kwd">return</span><span class="hl std">(x)</span>
+    <span class="hl std">}</span>
+<span class="hl std">}</span>
+
+<span class="hl std">results</span><span class="hl opt">$</span><span class="hl std">pred</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sapply</span><span class="hl std">(results</span><span class="hl opt">$</span><span class="hl std">pred,to_zero)</span>
+<span class="hl std">mse</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">mean</span><span class="hl std">((results</span><span class="hl opt">$</span><span class="hl std">real</span><span class="hl opt">-</span><span class="hl std">results</span><span class="hl opt">$</span><span class="hl std">pred)</span><span class="hl opt">^</span><span class="hl num">2</span><span class="hl std">)</span>
+<span class="hl kwd">print</span><span class="hl std">(mse)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 4.411405
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">mse</span><span class="hl opt">^</span><span class="hl num">0.5</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 2.100335
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">SSE</span> <span class="hl kwb">=</span> <span class="hl kwd">sum</span><span class="hl std">((results</span><span class="hl opt">$</span><span class="hl std">pred</span> <span class="hl opt">-</span> <span class="hl std">results</span><span class="hl opt">$</span><span class="hl std">real)</span><span class="hl opt">^</span><span class="hl num">2</span><span class="hl std">)</span>
+<span class="hl std">SST</span> <span class="hl kwb">=</span> <span class="hl kwd">sum</span><span class="hl std">( (</span><span class="hl kwd">mean</span><span class="hl std">(df</span><span class="hl opt">$</span><span class="hl std">G3)</span> <span class="hl opt">-</span> <span class="hl std">results</span><span class="hl opt">$</span><span class="hl std">real)</span><span class="hl opt">^</span><span class="hl num">2</span><span class="hl std">)</span>
+
+<span class="hl std">R2</span> <span class="hl kwb">=</span> <span class="hl num">1</span> <span class="hl opt">-</span> <span class="hl std">SSE</span><span class="hl opt">/</span><span class="hl std">SST</span>
+<span class="hl std">R2</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 0.7779023
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl com">#not too bad. .77 variance</span>
+</pre></div>
+</div></div>
+
+
+
+</body>
+</html>
