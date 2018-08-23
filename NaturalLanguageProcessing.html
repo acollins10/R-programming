@@ -1,0 +1,149 @@
+<html>
+
+<head>
+<style type="text/css">
+.knitr .inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage .left {
+  text-align: left;
+}
+.rimage .right {
+  text-align: right;
+}
+.rimage .center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<title>Title</title>
+</head>
+
+<body>
+
+<p>Natural Language Processing Example:</p>
+
+<div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">install.packages</span><span class="hl std">(</span><span class="hl str">'wordcloud'</span><span class="hl std">)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## Installing package into 'C:/Users/April/Documents/R/win-library/3.3'
+## (as 'lib' is unspecified)
+</pre></div>
+<div class="output"><pre class="knitr r">## package 'wordcloud' successfully unpacked and MD5 sums checked
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: cannot remove prior installation of package 'wordcloud'
+</pre></div>
+<div class="output"><pre class="knitr r">## 
+## The downloaded binary packages are in
+## 	C:\Users\April\AppData\Local\Temp\RtmpaW6Qfq\downloaded_packages
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">install.packages</span><span class="hl std">(</span><span class="hl str">'RColorBrewer'</span><span class="hl std">)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## Installing package into 'C:/Users/April/Documents/R/win-library/3.3'
+## (as 'lib' is unspecified)
+</pre></div>
+<div class="output"><pre class="knitr r">## package 'RColorBrewer' successfully unpacked and MD5 sums checked
+## 
+## The downloaded binary packages are in
+## 	C:\Users\April\AppData\Local\Temp\RtmpaW6Qfq\downloaded_packages
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(tm)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## Loading required package: NLP
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(twitteR)</span>
+<span class="hl kwd">library</span><span class="hl std">(wordcloud)</span>
+</pre></div>
+<div class="error"><pre class="knitr r">## Error in library(wordcloud): there is no package called 'wordcloud'
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(RColorBrewer)</span>
+<span class="hl com">#library(e1071)</span>
+<span class="hl kwd">library</span><span class="hl std">(class)</span>
+<span class="hl std">ckey</span> <span class="hl kwb">&lt;-</span> <span class="hl std">(</span><span class="hl str">'oBYz0DjSL8ohSwOE3JppvmDVb'</span><span class="hl std">)</span>
+<span class="hl kwd">print</span><span class="hl std">(ckey)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] &quot;oBYz0DjSL8ohSwOE3JppvmDVb&quot;
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">cskey</span> <span class="hl kwb">&lt;-</span> <span class="hl std">(</span><span class="hl str">'VlmU4Yzm7yUn3XFm8JfGmdvf14PILGsz0ycS8uvWP8ea3rSmOA'</span><span class="hl std">)</span>
+<span class="hl std">atoken</span> <span class="hl kwb">&lt;-</span> <span class="hl std">(</span><span class="hl str">'2547771526-KeSXeN3rvY1O52E3myUiNQadJCTozcKbNPZHbuW'</span><span class="hl std">)</span>
+<span class="hl std">astoken</span> <span class="hl kwb">&lt;-</span> <span class="hl std">(</span><span class="hl str">'d343GgbJa4wOIiKLAPZkpczkJtvH1XMx7qIynbIvbOjgj'</span><span class="hl std">)</span>
+
+<span class="hl kwd">setup_twitter_oauth</span><span class="hl std">(ckey, cskey, atoken, astoken)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] &quot;Using direct authentication&quot;
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">soccer.tweets</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">searchTwitter</span><span class="hl std">(</span><span class="hl str">'soccer'</span><span class="hl std">,</span><span class="hl kwc">n</span><span class="hl std">=</span><span class="hl num">2000</span><span class="hl std">,</span><span class="hl kwc">lang</span> <span class="hl std">=</span> <span class="hl str">'en'</span><span class="hl std">)</span>
+<span class="hl std">soccer.text</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sapply</span><span class="hl std">(soccer.tweets,</span> <span class="hl kwa">function</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">) x</span><span class="hl opt">$</span><span class="hl kwd">getText</span><span class="hl std">())</span>
+<span class="hl std">soccer.text</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">iconv</span><span class="hl std">(soccer.text,</span><span class="hl str">'UTF-8'</span><span class="hl std">,</span><span class="hl str">'ASCII'</span><span class="hl std">)</span>
+<span class="hl std">soccer.corpus</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">Corpus</span><span class="hl std">(</span><span class="hl kwd">VectorSource</span><span class="hl std">(soccer.text))</span>
+<span class="hl std">term.doc.matrix</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">TermDocumentMatrix</span><span class="hl std">(soccer.corpus,</span>
+                                      <span class="hl kwc">control</span><span class="hl std">=</span><span class="hl kwd">list</span><span class="hl std">(</span><span class="hl kwc">removePunctuation</span> <span class="hl std">=</span> <span class="hl num">TRUE</span><span class="hl std">,</span>
+                                                                 <span class="hl kwc">stopwords</span> <span class="hl std">=</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl str">&quot;soccer&quot;</span><span class="hl std">,</span><span class="hl str">&quot;http&quot;</span><span class="hl std">,</span> <span class="hl kwd">stopwords</span><span class="hl std">(</span><span class="hl str">&quot;english&quot;</span><span class="hl std">)),</span>
+                                                                 <span class="hl kwc">removeNumbers</span> <span class="hl std">=</span> <span class="hl num">TRUE</span><span class="hl std">,</span><span class="hl kwc">tolower</span> <span class="hl std">=</span> <span class="hl num">TRUE</span><span class="hl std">))</span>
+
+
+<span class="hl kwd">head</span><span class="hl std">(term.doc.matrix)</span>
+</pre></div>
+<div class="error"><pre class="knitr r">## Error in x$nrow: $ operator is invalid for atomic vectors
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">term.doc.matrix</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">as.matrix</span><span class="hl std">(term.doc.matrix)</span>
+
+<span class="hl std">word.freqs</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sort</span><span class="hl std">(</span><span class="hl kwd">rowSums</span><span class="hl std">(term.doc.matrix),</span> <span class="hl kwc">decreasing</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">)</span>
+<span class="hl std">dm</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">data.frame</span><span class="hl std">(</span><span class="hl kwc">word</span><span class="hl std">=</span><span class="hl kwd">names</span><span class="hl std">(word.freqs),</span> <span class="hl kwc">freq</span><span class="hl std">=word.freqs)</span>
+
+<span class="hl kwd">wordcloud</span><span class="hl std">(dm</span><span class="hl opt">$</span><span class="hl std">word, dm</span><span class="hl opt">$</span><span class="hl std">freq,</span> <span class="hl kwc">random.order</span><span class="hl std">=</span><span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">colors</span><span class="hl std">=</span><span class="hl kwd">brewer.pal</span><span class="hl std">(</span><span class="hl num">8</span><span class="hl std">,</span> <span class="hl str">&quot;Dark2&quot;</span><span class="hl std">))</span>
+</pre></div>
+<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): could not find function &quot;wordcloud&quot;
+</pre></div>
+</div></div>
+
+
+
+</body>
+</html>
